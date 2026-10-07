@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'services/attendance_service.dart';
+import 'services/absentee_service.dart';
 import 'services/student_service.dart';
 import 'services/auth_service.dart';
 
@@ -35,16 +37,30 @@ class _LoginScreenState extends State<LoginScreen> {
   String password = passwordController.text;
 
   try {
-    final result = await AuthService.login(email, password);
+   final result = await AuthService.login(email, password);
 
-    if (result['success'] == true) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const DepartmentScreen(),
-        ),
-      );
-    } else {
+if (result['success'] == true) {
+  final role = result['role'];
+
+  if (role == 'STAFF') {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DepartmentScreen(),
+      ),
+    );
+  } else if (role == 'HOD' ||
+      role == 'VICE_PRINCIPAL' ||
+      role == 'PRINCIPAL') {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AbsenteeViewScreen(),
+      ),
+    );
+  }
+}
+    else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -470,9 +486,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     try {
       final data = await StudentService.getStudents(
         widget.department,
-        int.parse(widget.year),
+        int.parse(widget.year.replaceAll(RegExp(r'[^0-9]'), '')),
         widget.section,
-      );
+);
 
       setState(() {
         students = data.map<Map<String, dynamic>>((student) {
@@ -491,17 +507,30 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         isLoading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to load students: $e'),
-        ),
-      );
+      print('FAILED TO LOAD STUDENTS: $e');
     }
   }
+Future<void> _submitAttendance() async {
+  try {
+    final today = DateTime.now();
+    final date =
+        '${today.year.toString().padLeft(4, '0')}-'
+        '${today.month.toString().padLeft(2, '0')}-'
+        '${today.day.toString().padLeft(2, '0')}';
 
-  void _submitAttendance() {
-    List<Map<String, dynamic>> absentStudents =
+    for (final student in students) {
+      await AttendanceService.saveAttendance(
+        studentId: student['studentId'],
+        staffId: 1,
+        date: date,
+        status: student['present'] == true ? 'PRESENT' : 'ABSENT',
+      );
+    }
+
+    final absentStudents =
         students.where((student) => student['present'] == false).toList();
+
+    if (!mounted) return;
 
     Navigator.push(
       context,
@@ -514,7 +543,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         ),
       ),
     );
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to save attendance: $e'),
+      ),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -699,6 +737,88 @@ class AbsenteeScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+class AbsenteeViewScreen extends StatefulWidget {
+  const AbsenteeViewScreen({super.key});
+
+  @override
+  State<AbsenteeViewScreen> createState() => _AbsenteeViewScreenState();
+}
+
+class _AbsenteeViewScreenState extends State<AbsenteeViewScreen> {
+  List<dynamic> absentees = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAbsentees();
+  }
+
+  Future<void> _loadAbsentees() async {
+    try {
+      final data = await AbsenteeService.getAbsentees();
+
+      if (!mounted) return;
+
+      setState(() {
+        absentees = data;
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        isLoading = false;
+      });
+
+      print('FAILED TO LOAD ABSENTEES: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Absentee List'),
+      ),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : absentees.isEmpty
+              ? const Center(
+                  child: Text(
+                    'No absentees found',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: absentees.length,
+                  itemBuilder: (context, index) {
+                    final student = absentees[index];
+
+                    return Card(
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          child: Text('${index + 1}'),
+                        ),
+                        title: Text(
+                          student['student_name'] ?? '',
+                        ),
+                        subtitle: Text(
+                          '${student['register_number'] ?? ''}\n'
+                          '${student['department'] ?? ''} • '
+                          '${student['year'] ?? ''} Year • '
+                          'Section ${student['section'] ?? ''}',
+                        ),
+                      ),
+                    );
+                  },
+                ),
     );
   }
 }

@@ -2,12 +2,13 @@ package com.pingloop.backend.controller;
 
 import com.pingloop.backend.model.User;
 import com.pingloop.backend.repository.UserRepository;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
