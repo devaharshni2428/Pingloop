@@ -1,5 +1,6 @@
 USE pingloop;
 
+UPDATE students SET register_number = '113325104044', year = 2, section = 'D' WHERE register_number = '113324104044';
 UPDATE students SET year = 3 WHERE register_number = '113324104044';
 UPDATE students SET year = 3 WHERE register_number = '113324104050';
 UPDATE students SET year = 3 WHERE register_number = '113324104128';
