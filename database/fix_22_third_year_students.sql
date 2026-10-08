@@ -1,0 +1,24 @@
+USE pingloop;
+
+UPDATE students SET year = 3 WHERE register_number = '113324104044';
+UPDATE students SET year = 3 WHERE register_number = '113324104050';
+UPDATE students SET year = 3 WHERE register_number = '113324104128';
+UPDATE students SET year = 3 WHERE register_number = '113324104172';
+UPDATE students SET year = 3 WHERE register_number = '113324104037';
+UPDATE students SET year = 3 WHERE register_number = '113324104120';
+UPDATE students SET year = 3 WHERE register_number = '113324104132';
+UPDATE students SET year = 3 WHERE register_number = '113324104138';
+UPDATE students SET year = 3 WHERE register_number = '113324104004';
+UPDATE students SET year = 3 WHERE register_number = '113324104054';
+UPDATE students SET year = 3 WHERE register_number = '113324104158';
+UPDATE students SET year = 3 WHERE register_number = '113324104180';
+UPDATE students SET year = 3 WHERE register_number = '113324104225';
+UPDATE students SET year = 3 WHERE register_number = '113324104022';
+UPDATE students SET year = 3 WHERE register_number = '113324104032';
+UPDATE students SET year = 3 WHERE register_number = '113324104074';
+UPDATE students SET year = 3 WHERE register_number = '113324104075';
+UPDATE students SET year = 3 WHERE register_number = '113324104148';
+UPDATE students SET year = 3 WHERE register_number = '113324104159';
+UPDATE students SET year = 3 WHERE register_number = '113324104188';
+UPDATE students SET year = 3 WHERE register_number = '113324104193';
+UPDATE students SET year = 3 WHERE register_number = '113324104216';
