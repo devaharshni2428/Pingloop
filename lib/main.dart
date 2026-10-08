@@ -780,9 +780,29 @@ class _AbsenteeViewScreenState extends State<AbsenteeViewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, List<dynamic>> yearWiseAbsentees = {};
+
+    for (final student in absentees) {
+      final year = '${student['year'] ?? ''}';
+
+      if (year.isNotEmpty) {
+        yearWiseAbsentees.putIfAbsent(year, () => []);
+        yearWiseAbsentees[year]!.add(student);
+      }
+    }
+
+    final sortedYears = yearWiseAbsentees.keys.toList()
+      ..sort((a, b) => int.parse(a).compareTo(int.parse(b)));
+
+    final today = DateTime.now();
+    final date =
+        '${today.day.toString().padLeft(2, '0')}-'
+        '${today.month.toString().padLeft(2, '0')}-'
+        '${today.year}';
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Absentee List'),
+        title: const Text('ABSENTEES'),
       ),
       body: isLoading
           ? const Center(
@@ -795,29 +815,70 @@ class _AbsenteeViewScreenState extends State<AbsenteeViewScreen> {
                     style: TextStyle(fontSize: 18),
                   ),
                 )
-              : ListView.builder(
+              : ListView(
                   padding: const EdgeInsets.all(16),
-                  itemCount: absentees.length,
-                  itemBuilder: (context, index) {
-                    final student = absentees[index];
+                  children: [
+                    const Text(
+                      'ABSENTEES',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
 
-                    return Card(
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          child: Text('${index + 1}'),
-                        ),
-                        title: Text(
-                          student['student_name'] ?? '',
-                        ),
-                        subtitle: Text(
-                          '${student['register_number'] ?? ''}\n'
-                          '${student['department'] ?? ''} • '
-                          '${student['year'] ?? ''} Year • '
-                          'Section ${student['section'] ?? ''}',
+                    const SizedBox(height: 8),
+
+                    Text(
+                      'Date: $date',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    for (final year in sortedYears) ...[
+                      Text(
+                        '$year${year == '2' ? 'nd' : year == '3' ? 'rd' : year == '4' ? 'th' : 'th'} YEAR',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    );
-                  },
+
+                      const SizedBox(height: 8),
+
+                      ...yearWiseAbsentees[year]!.asMap().entries.map(
+                        (entry) {
+                          final index = entry.key;
+                          final student = entry.value;
+
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                child: Text('${index + 1}'),
+                              ),
+                              title: Text(
+                                student['student_name'] ?? '',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: Text(
+                                '${student['register_number'] ?? ''}\n'
+                                '${student['department'] ?? ''} • '
+                                'Section ${student['section'] ?? ''}',
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+                    ],
+                  ],
                 ),
     );
   }
