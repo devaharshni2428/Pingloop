@@ -135,11 +135,13 @@ class RoleScope {
   final String? department;
   final String? year;
   final String? section;
+  final int? userId;
 
   const RoleScope({
     required this.role,
     this.department,
     this.year,
     this.section,
+    this.userId,
   });
 }

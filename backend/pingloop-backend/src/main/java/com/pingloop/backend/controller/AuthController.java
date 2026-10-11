@@ -36,6 +36,7 @@ public class AuthController {
             if (user.getPassword().equals(password)) {
 
                 response.put("success", true);
+                response.put("user_id", user.getUser_id());
                 response.put("message", "Login successful");
                 response.put("role", user.getRole());
                 response.put("name", user.getName());

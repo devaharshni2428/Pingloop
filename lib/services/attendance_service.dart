@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -30,5 +31,32 @@ class AttendanceService {
         'Failed to save attendance: ${response.body}',
       );
     }
+  }
+
+  static Future<List<dynamic>> getAttendance({
+    required String date,
+  }) async {
+    final url = Uri.parse(
+      '$baseUrl/api/attendance',
+    ).replace(
+      queryParameters: {'date': date},
+    );
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      if (data is List) {
+        return data;
+      }
+
+      throw Exception('Unexpected attendance API response');
+    }
+
+    throw Exception(
+      'Failed to load attendance: '
+      '${response.statusCode} ${response.body}',
+    );
   }
 }
